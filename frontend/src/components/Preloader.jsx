@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function Preloader() {
+export default function Preloader({ onDone }) {
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
 
@@ -10,10 +10,10 @@ export default function Preloader() {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(timer);
-          setTimeout(() => setIsLoading(false), 500); // Wait a half-second at 100%
+          setTimeout(() => setIsLoading(false), 500);
           return 100;
         }
-        return prev + 2; // Speed of the loader
+        return prev + 2;
       });
     }, 20);
 
@@ -26,7 +26,8 @@ export default function Preloader() {
         <motion.div
            initial={{ y: 0 }}
            exit={{ y: '-100%', transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] } }}
-           className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-ieee-deep text-ieee-light overflow-hidden"
+           onAnimationComplete={() => { if (!isLoading && onDone) onDone(); }}
+           className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-ieee-deep text-ieee-light overflow-hidden"
         >
           {/* Background noise/texture can optionally go here */}
           
