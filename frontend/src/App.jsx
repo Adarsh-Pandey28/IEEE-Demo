@@ -529,6 +529,7 @@ function BoardSection() {
               behindGlowEnabled={true}
               showUserInfo={true}
               enableTilt={true}
+              enableMobileTilt={true}
             />
           ))}
         </div>
@@ -551,6 +552,7 @@ function BoardSection() {
               behindGlowEnabled={true}
               showUserInfo={true}
               enableTilt={true}
+              enableMobileTilt={true}
             />
           ))}
         </div>
