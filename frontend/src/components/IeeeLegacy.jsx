@@ -21,35 +21,63 @@ const pioneers = [
 const infinitePioneers = [...pioneers, ...pioneers, ...pioneers];
 
 function PioneerCard({ pioneer }) {
-  const [hovered, setHovered] = useState(false);
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const cardRef = useRef(null);
+  const hoveredRef = useRef(false);
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = useCallback((e) => {
+    if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    setMousePos({ x, y });
-
     const dx = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
     const dy = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
-    setTilt({ x: -dy * 6, y: dx * 6 });
-  };
-  const handleMouseLeave = () => { setHovered(false); setTilt({ x: 0, y: 0 }); };
+    // Write directly to DOM — no React re-render
+    cardRef.current.style.setProperty('--tilt-x', `${-dy * 6}deg`);
+    cardRef.current.style.setProperty('--tilt-y', `${dx * 6}deg`);
+    const glow = cardRef.current.querySelector('.pioneer-glow');
+    if (glow) glow.style.background = `radial-gradient(circle 120px at ${x}px ${y}px, rgba(0, 194, 255, 0.14), transparent 80%)`;
+  }, []);
+
+  const handleMouseEnter = useCallback(() => {
+    hoveredRef.current = true;
+    if (cardRef.current) {
+      cardRef.current.style.setProperty('--hover-y', '-10px');
+      const glow = cardRef.current.querySelector('.pioneer-glow');
+      if (glow) glow.style.opacity = '1';
+      const badge = cardRef.current.querySelector('.pioneer-badge');
+      if (badge) badge.style.transform = 'scale(1.08)';
+      const line = cardRef.current.querySelector('.pioneer-line');
+      if (line) line.style.width = '60%';
+    }
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    hoveredRef.current = false;
+    if (cardRef.current) {
+      cardRef.current.style.setProperty('--tilt-x', '0deg');
+      cardRef.current.style.setProperty('--tilt-y', '0deg');
+      cardRef.current.style.setProperty('--hover-y', '0px');
+      const glow = cardRef.current.querySelector('.pioneer-glow');
+      if (glow) glow.style.opacity = '0';
+      const badge = cardRef.current.querySelector('.pioneer-badge');
+      if (badge) badge.style.transform = 'scale(1)';
+      const line = cardRef.current.querySelector('.pioneer-line');
+      if (line) line.style.width = '25%';
+    }
+  }, []);
 
   return (
     <div style={{ perspective: "900px" }} className="flex-shrink-0 w-[230px]">
-      <motion.div
+      <div
         ref={cardRef}
-        onMouseEnter={() => setHovered(true)}
+        onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onMouseMove={handleMouseMove}
-        animate={{
-          rotateX: tilt.x, rotateY: tilt.y,
-          y: hovered ? -10 : 0,
+        style={{
+          transform: 'rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg)) translateY(var(--hover-y,0px))',
+          transition: 'transform 0.25s cubic-bezier(0.23,1,0.32,1)',
+          willChange: 'transform',
         }}
-        transition={{ type: "spring", stiffness: 300, damping: 25 }}
         className="w-full select-none cursor-pointer"
       >
         <BorderGlow
@@ -76,15 +104,11 @@ function PioneerCard({ pioneer }) {
             {/* Top brand gradient bar */}
             <div className="h-[4px] w-full bg-gradient-to-r from-[#00C2FF] to-[#0A66C2] relative z-10" />
 
-            {/* Interactive mouse-tracking radial glow */}
-            {hovered && (
-              <div 
-                className="absolute inset-0 pointer-events-none transition-opacity duration-300 z-0"
-                style={{
-                  background: `radial-gradient(circle 120px at ${mousePos.x}px ${mousePos.y}px, rgba(0, 194, 255, 0.14), transparent 80%)`
-                }}
-              />
-            )}
+            {/* Interactive mouse-tracking radial glow - always mounted, toggled via JS */}
+            <div
+              className="pioneer-glow absolute inset-0 pointer-events-none z-0"
+              style={{ opacity: 0, transition: 'opacity 0.3s' }}
+            />
 
             {/* Faint technical circuit / grid watermark background */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
@@ -116,17 +140,14 @@ function PioneerCard({ pioneer }) {
 
               {/* Monogram badge */}
               <div className="flex items-center justify-center mb-5 relative">
-                <motion.div
-                  animate={{
-                    scale: hovered ? 1.08 : 1,
-                  }}
-                  transition={{ duration: 0.4 }}
-                  className="relative w-[64px] h-[64px] rounded-full flex items-center justify-center z-10 bg-gradient-to-tr from-[#00C2FF] to-[#0A66C2]"
+                <div
+                  className="pioneer-badge relative w-[64px] h-[64px] rounded-full flex items-center justify-center z-10 bg-gradient-to-tr from-[#00C2FF] to-[#0A66C2]"
+                  style={{ transition: 'transform 0.4s ease', willChange: 'transform' }}
                 >
                   <span className="font-display text-white text-lg font-bold">
                     {pioneer.initials}
                   </span>
-                </motion.div>
+                </div>
               </div>
 
               {/* Name */}
@@ -140,10 +161,9 @@ function PioneerCard({ pioneer }) {
               </p>
 
               {/* Accent line */}
-              <motion.div
-                animate={{ width: hovered ? "60%" : "25%" }}
-                transition={{ duration: 0.3 }}
-                className="h-[1px] bg-gradient-to-r from-[#00C2FF] to-transparent mb-4"
+              <div
+                className="pioneer-line h-[1px] bg-gradient-to-r from-[#00C2FF] to-transparent mb-4"
+                style={{ width: '25%', transition: 'width 0.3s ease' }}
               />
 
               {/* Contribution */}
@@ -163,7 +183,7 @@ function PioneerCard({ pioneer }) {
             </div>
           </div>
         </BorderGlow>
-      </motion.div>
+      </div>
     </div>
   );
 }

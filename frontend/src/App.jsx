@@ -298,7 +298,7 @@ function ChaptersSection() {
   ];
 
   return (
-    <div id="chapters" ref={container}>
+    <div id="chapters" ref={container} className="relative z-10 bg-black">
       <section className="chapter-panel h-screen w-full flex items-center justify-center bg-ieee-light text-ieee-deep relative z-[1]">
         <div className="text-center">
           <h2 className="text-4xl md:text-8xl font-display font-medium tracking-tighter mb-4">Our Chapters.</h2>
@@ -342,7 +342,7 @@ function EventsSection() {
   ];
 
   return (
-    <div id="events" ref={container} className="bg-black">
+    <div id="events" ref={container} className="relative z-20 bg-black">
       <section
         className="event-panel h-screen w-full flex flex-col items-center justify-center bg-[#050811] text-ieee-light relative overflow-hidden z-[1] rounded-t-[3rem] mt-[-3rem] shadow-[0_-10px_40px_rgba(0,0,0,0.2)] border-t border-white/10"
         style={{
@@ -431,16 +431,6 @@ function EventsSection() {
 function BoardSection() {
   const container = useRef(null);
 
-  useGSAP(() => {
-    const mm = gsap.matchMedia();
-    mm.add('(min-width: 768px)', () => {
-      const panels = gsap.utils.toArray('.exec-panel');
-      panels.forEach((panel) => {
-        ScrollTrigger.create({ trigger: panel, start: 'top top', pin: true, pinSpacing: false, end: () => `+=${window.innerHeight}` });
-      });
-    });
-  }, { scope: container });
-
   const group1 = [
     {
       name: 'Satoshi Tanaka',
@@ -502,8 +492,8 @@ function BoardSection() {
   ];
 
   return (
-    <div id="board" ref={container} className="bg-black text-ieee-deep">
-      <section className="exec-panel h-screen w-full flex items-center justify-center bg-ieee-light relative z-[1]">
+    <div id="board" ref={container} className="relative z-30 bg-black text-ieee-deep">
+      <section className="exec-panel h-screen w-full flex items-center justify-center bg-ieee-light md:sticky md:top-0 relative z-[1]">
         <div className="text-center px-8">
           <h2 className="text-4xl md:text-[8rem] font-display font-medium tracking-tighter mb-8 leading-none text-ieee-deep">
             Executive <br /> Board.
@@ -511,7 +501,7 @@ function BoardSection() {
           <p className="text-xl md:text-2xl font-sans opacity-70">Meet the leadership driving the vision.</p>
         </div>
       </section>
-      <section className="exec-panel min-h-screen md:h-screen w-full flex items-center justify-center bg-ieee-deep relative z-[2] rounded-t-[3rem] mt-[-3rem] shadow-[0_-10px_40px_rgba(0,0,0,0.2)] py-16 md:py-0">
+      <section className="exec-panel min-h-screen md:h-screen w-full flex items-center justify-center bg-ieee-deep md:sticky md:top-0 relative z-[2] rounded-t-[3rem] mt-[-3rem] shadow-[0_-10px_40px_rgba(0,0,0,0.2)] py-16 md:py-0">
         <div className="w-full max-w-7xl px-4 md:px-8 grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 justify-items-center">
           {group1.map((exec, i) => (
             <ProfileCard
@@ -534,7 +524,7 @@ function BoardSection() {
           ))}
         </div>
       </section>
-      <section className="exec-panel min-h-screen md:h-screen w-full flex items-center justify-center bg-ieee-cyan relative z-[3] rounded-t-[3rem] mt-[-3rem] shadow-[0_-10px_40px_rgba(0,0,0,0.2)] py-16 md:py-0">
+      <section className="exec-panel min-h-screen md:h-screen w-full flex items-center justify-center bg-ieee-cyan md:sticky md:top-0 relative z-[3] rounded-t-[3rem] mt-[-3rem] shadow-[0_-10px_40px_rgba(0,0,0,0.2)] py-16 md:py-0">
         <div className="w-full max-w-7xl px-4 md:px-8 grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 justify-items-center">
           {group2.map((exec, i) => (
             <ProfileCard
@@ -585,7 +575,7 @@ function AchievementsSection() {
   ];
 
   return (
-    <div id="achievements" ref={container} className="bg-black">
+    <div id="achievements" ref={container} className="relative z-40 bg-black">
       <section className="achievement-panel h-screen w-full flex items-center justify-center bg-ieee-deep text-ieee-light relative z-[1]">
         <h2 className="text-4xl md:text-8xl font-display font-medium text-center tracking-tighter">Our Milestones.</h2>
       </section>

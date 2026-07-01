@@ -53,9 +53,9 @@ const GradientBlinds = ({
     if (!container) return;
 
     const renderer = new Renderer({
-      dpr: dpr ?? (typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1),
+      dpr: Math.min(dpr ?? (typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1), 1),
       alpha: true,
-      antialias: true
+      antialias: false
     });
     rendererRef.current = renderer;
     const gl = renderer.gl;
@@ -269,8 +269,19 @@ void main() {
     };
     canvas.addEventListener('pointermove', onPointerMove);
 
+    let frameIndex = 0;
+    let visibleRef = true;
+    const io = new IntersectionObserver(([entry]) => { visibleRef = entry.isIntersecting; }, { threshold: 0 });
+    io.observe(container);
+
     const loop = t => {
       rafRef.current = requestAnimationFrame(loop);
+      // Throttle to ~30fps by skipping every other frame
+      frameIndex++;
+      if (frameIndex % 2 !== 0) return;
+      // Pause when off-screen
+      if (!visibleRef) return;
+
       uniforms.iTime.value = t * 0.001;
       if (mouseDampening > 0) {
         if (!lastTimeRef.current) lastTimeRef.current = t;
@@ -300,6 +311,7 @@ void main() {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       canvas.removeEventListener('pointermove', onPointerMove);
       ro.disconnect();
+      io.disconnect();
       if (canvas.parentElement === container) {
         container.removeChild(canvas);
       }

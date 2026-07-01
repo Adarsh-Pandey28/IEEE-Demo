@@ -24,7 +24,7 @@ export default function Footer() {
 
   return (
     <footer
-      className="relative overflow-hidden bg-ieee-deep text-ieee-light"
+      className="relative z-50 overflow-hidden bg-ieee-deep text-ieee-light"
       style={{ borderTop: '1px solid rgba(10,102,194,0.3)' }}
     >
       {/* Top gradient glow */}

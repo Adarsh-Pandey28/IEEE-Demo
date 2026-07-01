@@ -10,6 +10,8 @@ export default function WarpTransition() {
 
   useEffect(() => { isInViewRef.current = isInView; }, [isInView]);
 
+  const drawRef = useRef(null);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -24,7 +26,19 @@ export default function WarpTransition() {
     }));
     let speed = 0;
 
+    let frameCount = 0;
     const draw = () => {
+      if (!isInViewRef.current) {
+        animRef.current = null;
+        return;
+      }
+      frameCount++;
+      // Throttle to 30fps to save CPU cycles
+      if (frameCount % 2 !== 0) {
+        animRef.current = requestAnimationFrame(draw);
+        return;
+      }
+
       const W = canvas.width, H = canvas.height;
       const cx = W / 2, cy = H / 2;
       const target = isInViewRef.current ? 1 : 0;
@@ -50,9 +64,19 @@ export default function WarpTransition() {
       });
       animRef.current = requestAnimationFrame(draw);
     };
-    draw();
+    drawRef.current = draw;
+
+    if (isInViewRef.current) {
+      draw();
+    }
     return () => { cancelAnimationFrame(animRef.current); window.removeEventListener("resize", resize); };
   }, []);
+
+  useEffect(() => {
+    if (isInView && !animRef.current && drawRef.current) {
+      drawRef.current();
+    }
+  }, [isInView]);
 
   return (
     <div

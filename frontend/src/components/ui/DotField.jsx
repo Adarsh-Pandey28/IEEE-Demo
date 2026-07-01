@@ -107,9 +107,15 @@ const DotFieldComponent = ({
     const speedInterval = setInterval(updateMouseSpeed, 20);
 
     let frameCount = 0;
+    let isVisible = true;
+    const io = new IntersectionObserver(([entry]) => { isVisible = entry.isIntersecting; }, { threshold: 0 });
+    io.observe(canvas);
 
     function tick() {
       frameCount++;
+      rafRef.current = requestAnimationFrame(tick);
+      // Throttle to ~30fps and skip when off-screen
+      if (frameCount % 2 !== 0 || !isVisible) return;
       const dots = dotsRef.current;
       const m = mouseRef.current;
       const { w, h } = sizeRef.current;
@@ -202,7 +208,7 @@ const DotFieldComponent = ({
 
       ctx.fill();
 
-      rafRef.current = requestAnimationFrame(tick);
+      // RAF is set at top of tick
     }
 
     doResize();
@@ -214,6 +220,7 @@ const DotFieldComponent = ({
       cancelAnimationFrame(rafRef.current);
       clearInterval(speedInterval);
       clearTimeout(resizeTimer);
+      io.disconnect();
       window.removeEventListener('resize', resize);
       window.removeEventListener('mousemove', onMouseMove);
     };

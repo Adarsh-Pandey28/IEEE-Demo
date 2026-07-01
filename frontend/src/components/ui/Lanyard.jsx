@@ -2,6 +2,7 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, extend, useFrame } from '@react-three/fiber';
+import { useInView } from 'framer-motion';
 import { useGLTF, useTexture, Environment, Lightformer } from '@react-three/drei';
 import { BallCollider, CuboidCollider, Physics, RigidBody, useRopeJoint, useSphericalJoint } from '@react-three/rapier';
 import { MeshLineGeometry, MeshLineMaterial } from 'meshline';
@@ -45,6 +46,9 @@ export default function Lanyard({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const wrapperRef = useRef(null);
+  const isInView = useInView(wrapperRef, { margin: '100px' }); // Load/resume slightly before entering viewport
+
   const cameraPos = useMemo(() => {
     if (isMobile) {
       // Bring camera closer (Z=11) and center y to show the card large and crisp
@@ -54,15 +58,16 @@ export default function Lanyard({
   }, [position, isMobile]);
 
   return (
-    <div className="lanyard-wrapper">
+    <div ref={wrapperRef} className="lanyard-wrapper">
       <Canvas
         camera={{ position: cameraPos, fov: fov }}
-        dpr={[1, isMobile ? 1.5 : 2]}
-        gl={{ alpha: transparent }}
+        dpr={1}
+        frameloop={isInView ? 'always' : 'never'}
+        gl={{ alpha: transparent, antialias: false }}
         onCreated={({ gl }) => gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)}
       >
         <ambientLight intensity={Math.PI} />
-        <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
+        <Physics gravity={gravity} timeStep={1 / 30}>
           <Band
             isMobile={isMobile}
             frontImage={frontImage}
