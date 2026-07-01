@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef, useEffect } from 'react';
-import CircuitBackground from '../components/ui/CircuitBackground';
+import GradientBlinds from '../components/ui/GradientBlinds';
 import { IeeeLogo } from '../components/ui/hero-odyssey';
 
 export default function Home() {
@@ -46,7 +46,22 @@ export default function Home() {
       <LiquidFilterUpdater scale={liquidDistortionScale} />
 
       {/* 1. Immersive Circuit Board Background */}
-      <CircuitBackground />
+      <div className="absolute inset-0 z-0" style={{ width: '100%', height: '100%' }}>
+        <GradientBlinds
+          gradientColors={['#030914', '#071833', '#0A3B75', '#008bb3', '#030914']}
+          angle={45}
+          noise={0.1}
+          blindCount={14}
+          blindMinWidth={50}
+          spotlightRadius={0.6}
+          spotlightSoftness={1.2}
+          spotlightOpacity={0.4}
+          mouseDampening={0.15}
+          distortAmount={4}
+          shineDirection="left"
+          mixBlendMode="normal"
+        />
+      </div>
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-between px-6 md:px-16 pt-24 pb-12 overflow-hidden z-20">
@@ -63,7 +78,7 @@ export default function Home() {
                transition={{ duration: 1, delay: 0.2, ease: [0.76, 0, 0.24, 1] }}
                className="text-5xl md:text-[6.5rem] leading-[0.95] font-display font-medium tracking-tighter"
              >
-               Engineered <br/> For <span className="text-ieee-cyan italic">Impact.</span>
+               Engineering <br/> the <span className="text-ieee-cyan italic">Future.</span>
              </motion.h1>
           </div>
           
@@ -74,7 +89,7 @@ export default function Home() {
               transition={{ duration: 1, delay: 0.4, ease: [0.76, 0, 0.24, 1] }}
               className="text-base md:text-lg text-gray-300 font-sans leading-relaxed"
             >
-              We are the IEEE Student Branch. Advancing technology for humanity through bold innovation, rigorous engineering, and visionary leadership.
+              The IEEE Student Branch empowers ambitious engineers to innovate, collaborate, and build technologies that shape the future of humanity.
             </motion.p>
           </div>
 
@@ -115,7 +130,7 @@ export default function Home() {
             willChange: 'transform'
           }}
           whileHover={{ scale: 1.03 }}
-          className="hidden md:flex flex-1 justify-center items-center select-none drop-shadow-[0_0_35px_rgba(0,194,255,0.25)] relative"
+          className="hidden md:flex flex-1 justify-center items-center select-none drop-shadow-[0_0_35px_rgba(0,194,255,0.25)] relative -translate-y-12 z-30"
         >
           {/* Subtle slow floating background glow */}
           <div className="absolute w-[350px] h-[350px] bg-gradient-to-r from-ieee-cyan/20 to-ieee-bright/10 rounded-full blur-[100px] animate-pulse"></div>

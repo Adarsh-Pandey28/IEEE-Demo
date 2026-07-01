@@ -2,17 +2,17 @@ import { motion } from 'framer-motion';
 
 const links = {
   Explore: [
-    { label: 'About Us',       id: 'home' },
-    { label: 'IEEE Legacy',    id: 'legacy' },
-    { label: 'Our Chapters',   id: 'chapters' },
-    { label: 'Events',         id: 'events' },
-    { label: 'Executive Board',id: 'board' },
-    { label: 'Achievements',   id: 'achievements' },
+    { label: 'About Us', id: 'home' },
+    { label: 'IEEE Legacy', id: 'legacy' },
+    { label: 'Our Chapters', id: 'chapters' },
+    { label: 'Events', id: 'events' },
+    { label: 'Executive Board', id: 'board' },
+    { label: 'Achievements', id: 'achievements' },
   ],
   Connect: [
     { label: 'IEEE Official Site', href: 'https://www.ieee.org/' },
-    { label: 'Join IEEE',          href: 'https://www.ieee.org/membership/join/' },
-    { label: 'SRM University-AP',  href: 'https://srmap.edu.in/' },
+    { label: 'Join IEEE', href: 'https://www.ieee.org/membership/join/' },
+    { label: 'SRM University-AP', href: 'https://srmap.edu.in/' },
   ],
 };
 

@@ -1,49 +1,40 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import { motion, useInView, AnimatePresence } from "framer-motion";
-
-const BRIGHT = "#0A66C2";
-const CYAN   = "#00C2FF";
-const ACCENTS = [BRIGHT, CYAN, "#1756A8", "#1E7FD8", "#0D52A0", "#2B8FE0"];
+import { motion, useInView } from "framer-motion";
+import BorderGlow from "./ui/BorderGlow";
+import DotField from "./ui/DotField";
 
 const pioneers = [
-  { name: "Lord Kelvin",    initials: "LK", era: "1892", field: "Thermodynamics",      contribution: "Laid the absolute mathematical foundations of thermodynamics.",               ai: 0 },
-  { name: "Nikola Tesla",   initials: "NT", era: "1917", field: "Electrical Power",    contribution: "Pioneered AC power systems that electrified the modern world.",               ai: 1 },
-  { name: "Thomas Edison",  initials: "TE", era: "1928", field: "Electric Light",      contribution: "Invented practical electric lighting and power distribution.",                ai: 2 },
-  { name: "G. Marconi",     initials: "GM", era: "1918", field: "Wireless Comms",      contribution: "Invented long-distance wireless communication and modern radio.",             ai: 3 },
-  { name: "Vannevar Bush",  initials: "VB", era: "1949", field: "Computing & Defense", contribution: "Accelerated computing, defense research, and scientific innovation.",         ai: 4 },
-  { name: "Claude Shannon", initials: "CS", era: "1966", field: "Information Theory",  contribution: "Father of Information Theory - the math behind all digital communications.", ai: 5 },
-  { name: "Gordon Moore",   initials: "GM", era: "1998", field: "Semiconductor Law",   contribution: "Co-founded Intel. His law governed 50 years of chip evolution.",             ai: 0 },
-  { name: "Robert Noyce",   initials: "RN", era: "1978", field: "Microchip Pioneer",   contribution: "Co-invented the integrated circuit. Co-founded Intel.",                      ai: 1 },
-  { name: "Jack Kilby",     initials: "JK", era: "2000", field: "Nobel Laureate",      contribution: "Invented the monolithic integrated circuit. Nobel Prize winner.",            ai: 2 },
-  { name: "John Bardeen",   initials: "JB", era: "1952", field: "Transistor",          contribution: "Only physicist with two Nobel Prizes. Co-invented the transistor.",          ai: 3 },
-  { name: "Andrew Grove",   initials: "AG", era: "1999", field: "Semiconductors",      contribution: "Made Intel the world leading semiconductor company.",                        ai: 4 },
-  { name: "M. Dresselhaus", initials: "MD", era: "2012", field: "Nanotechnology",      contribution: "Queen of Carbon Science - revolutionized nanotechnology.",                   ai: 5 },
+  { name: "Lord Kelvin",    initials: "LK", era: "1892", field: "Thermodynamics",      contribution: "Laid the absolute mathematical foundations of thermodynamics." },
+  { name: "Nikola Tesla",   initials: "NT", era: "1917", field: "Electrical Power",    contribution: "Pioneered AC power systems that electrified the modern world." },
+  { name: "Thomas Edison",  initials: "TE", era: "1928", field: "Electric Light",      contribution: "Invented practical electric lighting and power distribution." },
+  { name: "G. Marconi",     initials: "GM", era: "1918", field: "Wireless Comms",      contribution: "Invented long-distance wireless communication and modern radio." },
+  { name: "Vannevar Bush",  initials: "VB", era: "1949", field: "Computing & Defense", contribution: "Accelerated computing, defense research, and scientific innovation." },
+  { name: "Claude Shannon", initials: "CS", era: "1966", field: "Information Theory",  contribution: "Father of Information Theory - the math behind all digital communications." },
+  { name: "Gordon Moore",   initials: "GM", era: "1998", field: "Semiconductor Law",   contribution: "Co-founded Intel. His law governed 50 years of chip evolution." },
+  { name: "Robert Noyce",   initials: "RN", era: "1978", field: "Microchip Pioneer",   contribution: "Co-invented the integrated circuit. Co-founded Intel." },
+  { name: "Jack Kilby",     initials: "JK", era: "2000", field: "Nobel Laureate",      contribution: "Invented the monolithic integrated circuit. Nobel Prize winner." },
+  { name: "John Bardeen",   initials: "JB", era: "1952", field: "Transistor",          contribution: "Only physicist with two Nobel Prizes. Co-invented the transistor." },
+  { name: "Andrew Grove",   initials: "AG", era: "1999", field: "Semiconductors",      contribution: "Made Intel the world leading semiconductor company." },
+  { name: "M. Dresselhaus", initials: "MD", era: "2012", field: "Nanotechnology",      contribution: "Queen of Carbon Science - revolutionized nanotechnology." },
 ];
 
 const infinitePioneers = [...pioneers, ...pioneers, ...pioneers];
 
-function Particle({ p }) {
-  return (
-    <motion.div
-      className="absolute rounded-full pointer-events-none"
-      style={{ width: p.size, height: p.size, background: "radial-gradient(circle,rgba(10,102,194,0.1) 0%,transparent 70%)", left: p.left, top: p.top }}
-      animate={{ y: [0, -50, 0], opacity: [0.1, 0.4, 0.1] }}
-      transition={{ duration: p.dur, repeat: Infinity, ease: "easeInOut", delay: p.delay }}
-    />
-  );
-}
-
 function PioneerCard({ pioneer }) {
   const [hovered, setHovered] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const cardRef = useRef(null);
-  const ac = ACCENTS[pioneer.ai];
 
   const handleMouseMove = (e) => {
     const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setMousePos({ x, y });
+
     const dx = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
     const dy = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
-    setTilt({ x: -dy * 9, y: dx * 9 });
+    setTilt({ x: -dy * 6, y: dx * 6 });
   };
   const handleMouseLeave = () => { setHovered(false); setTilt({ x: 0, y: 0 }); };
 
@@ -56,129 +47,122 @@ function PioneerCard({ pioneer }) {
         onMouseMove={handleMouseMove}
         animate={{
           rotateX: tilt.x, rotateY: tilt.y,
-          y: hovered ? -14 : 0,
-          boxShadow: hovered
-            ? "0 32px 80px rgba(10,102,194,0.4), 0 0 0 1.5px rgba(0,194,255,0.65)"
-            : "0 8px 36px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.07)",
+          y: hovered ? -10 : 0,
         }}
-        transition={{ type: "spring", stiffness: 280, damping: 22 }}
-        className="relative rounded-[22px] overflow-hidden cursor-pointer select-none"
-        style={{
-          background: "linear-gradient(155deg,#071428 0%,#050E1C 100%)",
-          border: hovered ? "1.5px solid rgba(0,194,255,0.5)" : "1px solid rgba(255,255,255,0.07)",
-          transformStyle: "preserve-3d",
-          height: "360px",
-          display: "flex",
-          flexDirection: "column",
-        }}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        className="w-full select-none cursor-pointer"
       >
-        {/* Top shimmer stripe */}
-        <div className="h-[3px] w-full relative overflow-hidden">
-          <div className="absolute inset-0" style={{ background: "linear-gradient(90deg,transparent,#0A66C2,#00C2FF,transparent)" }} />
-          <motion.div
-            animate={{ x: hovered ? ["160%", "-160%"] : "160%" }}
-            transition={{ duration: 1.1, repeat: hovered ? Infinity : 0, ease: "linear" }}
-            className="absolute inset-y-0 w-12"
-            style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.6),transparent)" }}
-          />
-        </div>
-
-        <AnimatePresence>
-          {hovered && (
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="absolute inset-0 pointer-events-none"
-              style={{ background: "radial-gradient(ellipse at 50% 0%,rgba(10,102,194,0.2) 0%,transparent 68%)" }}
-            />
-          )}
-        </AnimatePresence>
-
-        <div className="px-5 pt-5 pb-4 flex flex-col flex-1">
-          {/* Era pill */}
-          <div className="flex justify-end mb-4">
-            <span
-              className="text-xs font-sans font-medium px-3 py-0.5 rounded-full"
-              style={{ background: "rgba(10,102,194,0.18)", color: "#00C2FF", border: "1px solid rgba(0,194,255,0.25)" }}
-            >
-              {pioneer.era}
-            </span>
-          </div>
-
-          {/* Monogram badge */}
-          <div className="flex items-center justify-center mb-5 relative">
-            <motion.div
-              animate={{ opacity: hovered ? 1 : 0.18, scale: hovered ? 1.4 : 1 }}
-              transition={{ duration: 0.5 }}
-              className="absolute w-20 h-20 rounded-full blur-[44px]"
-              style={{ background: "radial-gradient(circle,rgba(10,102,194,0.9) 0%,transparent 70%)" }}
-            />
-            <motion.div
-              animate={{
-                scale: hovered ? 1.08 : 1,
-                boxShadow: hovered
-                  ? "0 0 36px rgba(0,194,255,0.3), 0 16px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)"
-                  : "0 4px 14px rgba(0,0,0,0.4)",
-              }}
-              transition={{ duration: 0.4 }}
-              className="relative w-[70px] h-[70px] rounded-2xl flex items-center justify-center z-10"
-              style={{
-                background: hovered
-                  ? "linear-gradient(145deg,rgba(10,102,194,0.45) 0%,rgba(0,194,255,0.15) 100%)"
-                  : "linear-gradient(145deg,rgba(10,102,194,0.15) 0%,rgba(10,102,194,0.05) 100%)",
-                border: hovered ? "1.5px solid rgba(0,194,255,0.55)" : "1.5px solid rgba(10,102,194,0.22)",
-              }}
-            >
-              <motion.span
-                animate={{ color: hovered ? "#00C2FF" : "rgba(0,194,255,0.45)" }}
-                className="font-display font-bold text-xl tracking-tight"
-              >
-                {pioneer.initials}
-              </motion.span>
-            </motion.div>
-          </div>
-
-          {/* Name — font-display font-bold, matching chapters */}
-          <h3 className="font-display font-bold text-base text-white leading-tight tracking-tight mb-1">
-            {pioneer.name}
-          </h3>
-
-          {/* Field — font-sans, small, muted */}
-          <p className="text-xs font-sans font-medium mb-3 uppercase tracking-wide" style={{ color: "rgba(0,194,255,0.6)" }}>
-            {pioneer.field}
-          </p>
-
-          {/* Accent line */}
-          <motion.div
-            animate={{ width: hovered ? "80%" : "32%", opacity: hovered ? 1 : 0.25 }}
-            transition={{ duration: 0.4 }}
-            className="h-[2px] rounded-full mb-4"
-            style={{ background: "linear-gradient(90deg,#0A66C2,#00C2FF,transparent)" }}
-          />
-
-          {/* Contribution */}
-          <motion.p
-            animate={{ opacity: hovered ? 0.9 : 0.42 }}
-            className="text-sm font-sans text-gray-400 leading-relaxed mt-auto line-clamp-3"
-          >
-            {pioneer.contribution}
-          </motion.p>
-        </div>
-
-        {/* Bottom bar */}
-        <div
-          className="px-5 py-3 flex items-center justify-between"
-          style={{ borderTop: "1px solid rgba(10,102,194,0.18)", background: "rgba(10,102,194,0.06)" }}
+        <BorderGlow
+          backgroundColor="transparent"
+          borderColor="rgba(0, 194, 255, 0.08)"
+          borderRadius={28}
+          glowColor="196 100 45"
+          colors={['#00C2FF', '#0A66C2', '#00C2FF']}
+          glowRadius={45}
+          glowIntensity={1.4}
+          edgeSensitivity={30}
         >
-          <span className="text-xs font-sans font-medium" style={{ color: "rgba(0,194,255,0.5)" }}>
-            IEEE Pioneer
-          </span>
-          <motion.div
-            animate={{ scale: hovered ? [1, 1.6, 1] : 1, opacity: hovered ? 1 : 0.28 }}
-            transition={{ duration: 0.9, repeat: hovered ? Infinity : 0 }}
-            className="w-2 h-2 rounded-full"
-            style={{ background: "#00C2FF", boxShadow: hovered ? "0 0 8px rgba(0,194,255,0.9)" : "none" }}
-          />
-        </div>
+          <div 
+            style={{ 
+              height: "360px", 
+              display: "flex", 
+              flexDirection: "column",
+              background: "linear-gradient(135deg, rgba(8, 14, 30, 0.8) 0%, rgba(3, 5, 11, 0.95) 100%)",
+              backdropFilter: "blur(12px)",
+              border: "1px border-white/5"
+            }} 
+            className="w-full relative overflow-hidden rounded-[28px]"
+          >
+            {/* Top brand gradient bar */}
+            <div className="h-[4px] w-full bg-gradient-to-r from-[#00C2FF] to-[#0A66C2] relative z-10" />
+
+            {/* Interactive mouse-tracking radial glow */}
+            {hovered && (
+              <div 
+                className="absolute inset-0 pointer-events-none transition-opacity duration-300 z-0"
+                style={{
+                  background: `radial-gradient(circle 120px at ${mousePos.x}px ${mousePos.y}px, rgba(0, 194, 255, 0.14), transparent 80%)`
+                }}
+              />
+            )}
+
+            {/* Faint technical circuit / grid watermark background */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+              <svg className="absolute inset-0 w-full h-full opacity-40" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id={`card-grid-${pioneer.initials}`} width="20" height="20" patternUnits="userSpaceOnUse">
+                    <circle cx="1" cy="1" r="0.8" fill="rgba(0, 194, 255, 0.06)" />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill={`url(#card-grid-${pioneer.initials})`} />
+                {/* Tech circles */}
+                <circle cx="30" cy="90" r="30" fill="none" stroke="rgba(0, 194, 255, 0.03)" strokeWidth="0.8" />
+                <circle cx="30" cy="90" r="45" fill="none" stroke="rgba(0, 194, 255, 0.02)" strokeWidth="0.8" strokeDasharray="3 3" />
+                {/* Tech line */}
+                <path d="M 140 330 L 175 295 L 210 295" fill="none" stroke="rgba(0, 194, 255, 0.04)" strokeWidth="1" />
+                <circle cx="210" cy="295" r="2" fill="rgba(0, 194, 255, 0.06)" />
+              </svg>
+            </div>
+
+            <div className="px-5 pt-5 pb-4 flex flex-col flex-1 relative z-10">
+              {/* Era pill */}
+              <div className="flex justify-end mb-4">
+                <span
+                  className="text-[10px] font-sans font-medium px-2.5 py-0.5 rounded-full bg-[#00C2FF]/10 text-[#00C2FF] border border-[#00C2FF]/20"
+                >
+                  {pioneer.era}
+                </span>
+              </div>
+
+              {/* Monogram badge */}
+              <div className="flex items-center justify-center mb-5 relative">
+                <motion.div
+                  animate={{
+                    scale: hovered ? 1.08 : 1,
+                  }}
+                  transition={{ duration: 0.4 }}
+                  className="relative w-[64px] h-[64px] rounded-full flex items-center justify-center z-10 bg-gradient-to-tr from-[#00C2FF] to-[#0A66C2]"
+                >
+                  <span className="font-display text-white text-lg font-bold">
+                    {pioneer.initials}
+                  </span>
+                </motion.div>
+              </div>
+
+              {/* Name */}
+              <h3 className="font-display text-lg text-white leading-tight mb-1">
+                {pioneer.name}
+              </h3>
+
+              {/* Field */}
+              <p className="text-[11px] font-sans font-semibold tracking-wider uppercase text-[#00C2FF] mb-3">
+                {pioneer.field}
+              </p>
+
+              {/* Accent line */}
+              <motion.div
+                animate={{ width: hovered ? "60%" : "25%" }}
+                transition={{ duration: 0.3 }}
+                className="h-[1px] bg-gradient-to-r from-[#00C2FF] to-transparent mb-4"
+              />
+
+              {/* Contribution */}
+              <p className="text-xs font-sans text-stone-300 leading-relaxed mt-auto line-clamp-4">
+                {pioneer.contribution}
+              </p>
+            </div>
+
+            {/* Bottom bar */}
+            <div
+              className="px-5 py-3 flex items-center justify-between border-t border-white/5 bg-white/5 relative z-10"
+            >
+              <span className="text-[10px] font-sans font-medium text-stone-400 uppercase tracking-wider">
+                IEEE Pioneer
+              </span>
+              <div className="w-1.5 h-1.5 rounded-full bg-[#00C2FF] shadow-[0_0_6px_#00C2FF]" />
+            </div>
+          </div>
+        </BorderGlow>
       </motion.div>
     </div>
   );
@@ -193,17 +177,7 @@ export default function IeeeLegacy() {
   const animFrameRef = useRef(null);
   const posRef = useRef(0);
   const CARD_WIDTH = 246;
-  const SPEED = 0.5;
-
-  const particles = useRef(
-    Array.from({ length: 20 }, (_, i) => ({
-      size: `${Math.random() * 160 + 60}px`,
-      left: `${(i / 20) * 110 - 5}%`,
-      top: `${Math.random() * 100}%`,
-      dur: Math.random() * 12 + 7,
-      delay: Math.random() * 6,
-    }))
-  ).current;
+  const SPEED = 0.4;
 
   const animate = useCallback(() => {
     if (!isPaused && trackRef.current) {
@@ -227,73 +201,76 @@ export default function IeeeLegacy() {
     <section
       ref={sectionRef}
       id="legacy"
-      className="relative overflow-hidden py-24"
-      style={{ background: "linear-gradient(180deg,#020814 0%,#030C18 60%,#020814 100%)" }}
+      className="relative overflow-hidden py-24 bg-[#050811]"
+      style={{
+        background: "radial-gradient(circle at 50% 30%, #0c1c36 0%, #060b14 60%, #030509 100%)"
+      }}
     >
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {particles.map((p, i) => <Particle key={i} p={p} />)}
+      {/* Dynamic blurred mesh gradient glow bubbles in the background */}
+      <div className="absolute w-[700px] h-[700px] rounded-full bg-[#0A66C2]/18 blur-[130px] pointer-events-none top-[5%] left-[-15%] z-0 animate-pulse" style={{ animationDuration: '8s' }} />
+      <div className="absolute w-[800px] h-[800px] rounded-full bg-[#00C2FF]/14 blur-[150px] pointer-events-none bottom-[5%] right-[-15%] z-0 animate-pulse" style={{ animationDuration: '12s' }} />
+      <div className="absolute w-[500px] h-[500px] rounded-full bg-[#60496e]/12 blur-[120px] pointer-events-none top-[20%] left-[25%] z-0" />
+
+      {/* Interactive DotField grid background */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        <DotField
+          dotRadius={1.5}
+          dotSpacing={16}
+          bulgeStrength={60}
+          glowRadius={180}
+          sparkle={true}
+          waveAmplitude={4}
+          gradientFrom="rgba(0, 194, 255, 0.45)"
+          gradientTo="rgba(10, 102, 194, 0.35)"
+          glowColor="rgba(0, 194, 255, 0.25)"
+        />
       </div>
-
-      <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
-        style={{ backgroundImage: "linear-gradient(rgba(10,102,194,1) 1px,transparent 1px),linear-gradient(90deg,rgba(10,102,194,1) 1px,transparent 1px)", backgroundSize: "60px 60px" }} />
-
-      <motion.div
-        initial={{ scaleX: 0, opacity: 0 }}
-        animate={isInView ? { scaleX: 1, opacity: 1 } : {}}
-        transition={{ duration: 1.4 }}
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-px"
-        style={{ background: "linear-gradient(90deg,transparent,#0A66C2,#00C2FF,#0A66C2,transparent)" }}
-      />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6">
 
-        {/* ── Header — same font style as Chapters/Events ── */}
+        {/* Header */}
         <div className="text-center mb-16">
           <motion.p
             initial={{ opacity: 0, y: -10 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.1 }}
-            className="text-sm font-sans font-semibold uppercase tracking-widest mb-4"
-            style={{ color: "#00C2FF" }}
+            className="text-xs font-sans font-semibold uppercase tracking-widest mb-4 text-[#00C2FF]"
           >
             IEEE Legacy &mdash; Since 1884
           </motion.p>
 
           <motion.h2
             initial={{ opacity: 0, y: 40 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.2, duration: 1 }}
-            className="text-6xl md:text-8xl font-display font-bold tracking-tighter text-white leading-[0.92] mb-5"
+            className="text-4xl md:text-8xl font-display tracking-tight text-white leading-[0.92] mb-5"
           >
-            The Minds That{" "}
-            <span style={{ background: "linear-gradient(135deg,#0A66C2 0%,#00C2FF 60%,#0A66C2 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              Changed the World.
-            </span>
+            The Minds That <span className="italic bg-gradient-to-r from-[#0A66C2] to-[#00C2FF] bg-clip-text text-transparent">Changed the World.</span>
           </motion.h2>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.35 }}
-            className="text-xl font-sans max-w-2xl mx-auto leading-relaxed text-gray-300"
+            className="text-lg font-sans max-w-2xl mx-auto leading-relaxed text-stone-400"
           >
             For more than a century, IEEE has honoured the pioneers whose breakthroughs
             transformed science, engineering, and humanity itself.
           </motion.p>
         </div>
 
-        {/* ── Carousel ── */}
+        {/* Carousel */}
         <motion.div
           initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.45 }}
           className="relative"
         >
           <button onClick={() => nudge(-1)}
-            className="absolute left-0 -translate-x-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full items-center justify-center hidden md:flex transition-all hover:scale-110"
-            style={{ background: "rgba(10,102,194,0.15)", border: "1px solid rgba(10,102,194,0.4)", backdropFilter: "blur(12px)" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#00C2FF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            className="absolute left-0 -translate-x-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full items-center justify-center hidden md:flex transition-all hover:scale-110 bg-white/10 border border-white/10 hover:bg-white/20"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
           <button onClick={() => nudge(1)}
-            className="absolute right-0 translate-x-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full items-center justify-center hidden md:flex transition-all hover:scale-110"
-            style={{ background: "rgba(10,102,194,0.15)", border: "1px solid rgba(10,102,194,0.4)", backdropFilter: "blur(12px)" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="#00C2FF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            className="absolute right-0 translate-x-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full items-center justify-center hidden md:flex transition-all hover:scale-110 bg-white/10 border border-white/10 hover:bg-white/20"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
 
-          <div className="absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none" style={{ background: "linear-gradient(90deg,#020814 0%,transparent 100%)" }} />
-          <div className="absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none" style={{ background: "linear-gradient(-90deg,#020814 0%,transparent 100%)" }} />
+          <div className="absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none bg-gradient-to-r from-[#060b14]/90 to-transparent" />
+          <div className="absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none bg-gradient-to-l from-[#060b14]/90 to-transparent" />
 
           <div className="overflow-hidden py-6"
             onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)}
@@ -309,21 +286,21 @@ export default function IeeeLegacy() {
             {pioneers.map((_, i) => (
               <button key={i} onClick={() => { posRef.current = i * CARD_WIDTH; }}
                 className="rounded-full transition-all duration-300"
-                style={{ width: currentPage === i ? "26px" : "6px", height: "6px", background: currentPage === i ? "linear-gradient(90deg,#0A66C2,#00C2FF)" : "rgba(255,255,255,0.14)" }} />
+                style={{ width: currentPage === i ? "20px" : "6px", height: "6px", background: currentPage === i ? "#fff" : "rgba(255,255,255,0.15)" }} />
             ))}
           </div>
         </motion.div>
 
-        {/* ── Quote ── */}
+        {/* Quote */}
         <motion.div
           initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.6 }}
           className="mt-24 text-center max-w-3xl mx-auto"
         >
-          <div className="w-32 h-px mx-auto mb-10" style={{ background: "linear-gradient(90deg,transparent,#0A66C2,#00C2FF,transparent)" }} />
-          <blockquote className="text-xl md:text-2xl font-display font-light text-white/65 leading-relaxed italic">
+          <div className="w-20 h-px bg-gradient-to-r from-transparent via-[#00C2FF] to-transparent mx-auto mb-10" />
+          <blockquote className="text-xl md:text-2xl font-display font-light text-stone-400 leading-relaxed italic">
             "Advancing Technology for Humanity is not just a motto - it is a legacy built by the greatest innovators."
           </blockquote>
-          <p className="mt-4 text-sm font-sans opacity-40 text-white">IEEE &mdash; Est. 1884</p>
+          <p className="mt-4 text-xs font-sans text-stone-500 uppercase tracking-widest">IEEE &mdash; Est. 1884</p>
         </motion.div>
       </div>
     </section>
