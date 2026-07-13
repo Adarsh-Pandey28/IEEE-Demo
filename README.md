@@ -9,13 +9,4 @@ Our platform is engineered not just to display information, but to **wow** visit
 *   **Cinematic "Stacking" Effects:** Entire pages are constructed using `GSAP ScrollTrigger` and `Lenis`, where screens pin natively to the viewport and subsequent panels overlap smoothly, mimicking a slick presentation.
 *   **Custom Dark-Mode Palette:** Relying strictly on the IEEE official identity: `#0A1F44` (Deep Blue), `#0A66C2` (Bright Blue), `#00C2FF` (Cyan), and an off-white `#F5F7FA`.
 
-## 🛠 Tech Stack
-
--   **Framework:** React 19 + TypeScript + Vite
--   **Routing:** React Router DOM (v7)
--   **Styling:** Tailwind CSS (v3.4.x via PostCSS for stable configurations)
--   **Animations & Physics:**
-    -   `gsap` & `@gsap/react` for complex ScrollTriggers and timeline manipulation
-    -   `framer-motion` for AnimatePresence page transitions and micro-interactions
-    -   `lenis` for the buttery smooth momentum scrolling that binds it all together
 
